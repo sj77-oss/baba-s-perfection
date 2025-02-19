@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import LoginPage from "./pages/login";
+import AdminLoginPage from "./pages/admin-login";
+import AdminPanel from "./pages/admin";
 import routes from "tempo-routes";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -17,12 +19,23 @@ function App() {
         <>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin-login" element={<AdminLoginPage />} />
             <Route
               path="/"
               element={
                 <PrivateRoute>
                   <Home />
                 </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                localStorage.getItem("adminSession") ? (
+                  <AdminPanel />
+                ) : (
+                  <Navigate to="/admin-login" />
+                )
               }
             />
           </Routes>

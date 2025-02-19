@@ -16,6 +16,7 @@ interface ChatWindowProps {
   onSendMessage?: (message: string) => void;
   onSettingsClick?: () => void;
   onMenuClick?: () => void;
+  isAdmin?: boolean;
 }
 
 const ChatWindow = ({
@@ -46,6 +47,7 @@ const ChatWindow = ({
   onMenuClick = () => {
     console.log("Menu clicked");
   },
+  isAdmin = false,
 }: ChatWindowProps) => {
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -54,6 +56,7 @@ const ChatWindow = ({
         botAvatar={botAvatar}
         onSettingsClick={onSettingsClick}
         onMenuClick={onMenuClick}
+        isAdmin={isAdmin}
       />
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} />

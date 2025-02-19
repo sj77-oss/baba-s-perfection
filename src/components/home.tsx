@@ -12,6 +12,37 @@ const Home = () => {
     id: string;
     title: string;
   }>();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+      setIsAdmin(!!profile?.is_admin);
+    };
+    checkAdmin();
+  }, [user]);
+
+  // Reset messages when no chat is selected
+  useEffect(() => {
+    if (!selectedChatId) {
+      setMessages([
+        {
+          id: "welcome",
+          content: "Welcome! How can I assist you today?",
+          isBot: true,
+          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+      setCurrentChat(undefined);
+    }
+  }, [selectedChatId]);
 
   const [messages, setMessages] = useState<
     Array<{
@@ -94,7 +125,89 @@ const Home = () => {
     };
   }, [selectedChatId, user]);
 
-  // Initialize with empty messages instead of welcome message
+  // Load messages when a chat is selected
+  useEffect(() => {
+    if (!selectedChatId || !user) return;
+
+    const loadChat = async () => {
+      try {
+        // Get chat details
+        const { data: chat } = await supabase
+          .from("chats")
+          .select()
+          .eq("id", selectedChatId)
+          .single();
+
+        if (chat) setCurrentChat(chat);
+
+        // Get messages
+        const { data: messages } = await supabase
+          .from("messages")
+          .select()
+          .eq("chat_id", selectedChatId)
+          .order("created_at", { ascending: true });
+
+        if (messages) {
+          setMessages(
+            messages.map((msg) => ({
+              id: msg.id,
+              content: msg.content || "",
+              isBot: msg.is_ai || false,
+              avatar: msg.is_ai
+                ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
+                : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+              timestamp: new Date(msg.created_at).toLocaleTimeString(),
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("Error loading chat:", error);
+      }
+    };
+
+    loadChat();
+  }, [selectedChatId, user]);
+
+  // Subscribe to message updates
+  useEffect(() => {
+    if (!selectedChatId) return;
+
+    const channel = supabase
+      .channel(`messages-${selectedChatId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `chat_id=eq.${selectedChatId}`,
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const msg = payload.new;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: msg.id,
+                content: msg.content || "",
+                isBot: msg.is_ai || false,
+                avatar: msg.is_ai
+                  ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
+                  : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+                timestamp: new Date(msg.created_at).toLocaleTimeString(),
+              },
+            ]);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [selectedChatId]);
+
+  // Welcome message when no chat is selected
   useEffect(() => {
     if (!selectedChatId) {
       setMessages([
@@ -131,6 +244,7 @@ const Home = () => {
             chat_id: selectedChatId,
             content: message,
             is_ai: false,
+            user_id: user.id, // Add user_id to track who sent the message
           },
         ])
         .select()
@@ -184,6 +298,7 @@ const Home = () => {
               botAvatar="https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
               messages={messages}
               onSendMessage={handleSendMessage}
+              isAdmin={isAdmin}
               onSettingsClick={() => {
                 console.log("Settings clicked");
               }}
