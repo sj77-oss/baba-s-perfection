@@ -47,10 +47,8 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const {
-        data: { user },
-        error: signUpError,
-      } = await supabase.auth.signUp({
+      // First sign up the user
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -60,27 +58,53 @@ export default function LoginForm() {
         },
       });
 
-      if (signUpError) throw signUpError;
-
-      if (user) {
-        // Create profile
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: user.id,
-            email: email,
-            full_name: fullName,
-            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
-          },
-        ]);
-
-        if (profileError) throw profileError;
-
-        // Auto login after registration
-        await signIn(email, password);
-        navigate("/");
+      if (signUpError) {
+        throw new Error(signUpError.message);
       }
+
+      if (!data.user) {
+        throw new Error("Registration failed");
+      }
+
+      // Create profile
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: data.user.id,
+          email: email,
+          full_name: fullName,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
+
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        // If profile creation fails, we should clean up the auth user
+        await supabase.auth.signOut();
+        throw new Error(`Failed to create profile: ${profileError.message}`);
+      }
+
+      // Auto login after registration
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        throw new Error(
+          "Registration successful but auto-login failed. Please try logging in.",
+        );
+      }
+
+      navigate("/");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      console.error("Registration error:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Registration failed. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }

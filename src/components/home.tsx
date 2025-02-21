@@ -258,8 +258,25 @@ const Home = () => {
           .eq("id", selectedChatId);
       }
 
+      // Add a loading message for the bot
+      const loadingMessageId = Date.now().toString();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: loadingMessageId,
+          content: "",
+          isBot: true,
+          isLoading: true,
+          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+
       // Get bot response
       const response = await getGeminiResponse(message);
+
+      // Remove loading message and add actual response
+      setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
 
       // Add bot response to UI immediately
       const botMessageTemp = {

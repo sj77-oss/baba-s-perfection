@@ -157,22 +157,30 @@ export default function ChatsTab() {
           <DialogHeader>
             <DialogTitle>Chat Messages</DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-[500px] w-full pr-4">
-            <div className="space-y-4">
+          <ScrollArea className="h-[500px] w-full pr-4 bg-gray-50">
+            <div className="space-y-4 p-4">
               {selectedChat?.messages?.map((message) => (
                 <div
                   key={message.id}
-                  className={`p-4 rounded-lg ${message.is_ai ? "bg-blue-50" : "bg-gray-50"}`}
+                  className={`p-4 rounded-lg ${message.is_ai ? "bg-blue-50 mr-auto" : "bg-gray-100 ml-auto"} max-w-[80%]`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium">
-                      {message.is_ai ? "AI" : "User"}
-                    </span>
-                    <span className="text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${message.is_ai ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-700"}`}
+                      >
+                        {message.is_ai ? "AI" : "User"}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-500">
                       {new Date(message.created_at).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-gray-700">{message.content}</p>
+                  <div className="space-y-2">
+                    <p className="text-gray-700 whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

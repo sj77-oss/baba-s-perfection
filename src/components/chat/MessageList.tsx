@@ -8,6 +8,7 @@ interface MessageData {
   isBot: boolean;
   avatar?: string;
   timestamp?: string;
+  isLoading?: boolean;
 }
 
 interface MessageListProps {
@@ -50,6 +51,7 @@ const MessageList = ({
               isBot={message.isBot}
               avatar={message.avatar}
               timestamp={message.timestamp}
+              isLoading={message.isLoading}
             />
           ))}
         </div>

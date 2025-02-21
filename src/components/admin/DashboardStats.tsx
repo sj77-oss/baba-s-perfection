@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { debounce } from "lodash";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MessageSquare, Activity, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -18,48 +19,81 @@ export default function DashboardStats() {
     activeUsers: 0,
   });
 
-  const fetchStats = async () => {
-    try {
-      // Get total users
-      const { count: usersCount } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true });
+  const fetchStats = useCallback(
+    debounce(async () => {
+      try {
+        // Get total users
+        const { data: users, error: usersError } = await supabase
+          .from("profiles")
+          .select("*");
 
-      // Get total chats
-      const { count: chatsCount } = await supabase
-        .from("chats")
-        .select("*", { count: "exact", head: true });
+        if (usersError) {
+          console.error("Error fetching users:", usersError);
+          throw usersError;
+        }
 
-      // Get total messages
-      const { count: messagesCount } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true });
+        const usersCount = users?.length || 0;
 
-      // Get active users in last 24h
-      const { data: activeUsers } = await supabase
-        .from("messages")
-        .select("user_id", { count: "exact" })
-        .gte(
-          "created_at",
-          new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        )
-        .not("user_id", "is", null)
-        .limit(1);
+        // Get total chats
+        const { data: chats, error: chatsError } = await supabase
+          .from("chats")
+          .select("*");
 
-      setStats({
-        totalUsers: usersCount || 0,
-        totalChats: chatsCount || 0,
-        totalMessages: messagesCount || 0,
-        activeUsers: activeUsers?.length || 0,
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
-  };
+        if (chatsError) {
+          console.error("Error fetching chats:", chatsError);
+          throw chatsError;
+        }
+
+        const chatsCount = chats?.length || 0;
+
+        // Get total messages
+        const { data: messages, error: messagesError } = await supabase
+          .from("messages")
+          .select("*");
+
+        if (messagesError) {
+          console.error("Error fetching messages:", messagesError);
+          throw messagesError;
+        }
+
+        const messagesCount = messages?.length || 0;
+
+        // Get active users in last 24h
+        const { data: activeUsers } = await supabase
+          .from("messages")
+          .select("user_id", { count: "exact", head: false })
+          .gte(
+            "created_at",
+            new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          )
+          .not("user_id", "is", null); // Get all non-null user_ids
+
+        // Count unique users
+        const uniqueActiveUsers = new Set(
+          activeUsers?.map((msg) => msg.user_id) || [],
+        );
+
+        setStats({
+          totalUsers: usersCount || 0,
+          totalChats: chatsCount || 0,
+          totalMessages: messagesCount || 0,
+          activeUsers: uniqueActiveUsers.size || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    }, 2000),
+    [],
+  );
 
   useEffect(() => {
     // Initial fetch
     fetchStats();
+
+    // Cleanup
+    return () => {
+      fetchStats.cancel();
+    };
 
     // Set up realtime subscriptions
     const usersChannel = supabase
