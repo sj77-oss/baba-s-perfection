@@ -6,14 +6,14 @@ export default function LoginPage() {
   const { session } = useAuth();
 
   if (session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/chat" replace />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-        <p className="text-gray-400">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+        <p className="text-gray-500">
           Sign in to continue or create a new account
         </p>
       </div>

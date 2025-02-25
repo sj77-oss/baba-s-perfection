@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { supabase } from "@/lib/supabase";
 
 export default function LoginForm() {
@@ -28,7 +29,7 @@ export default function LoginForm() {
 
     try {
       await signIn(email, password);
-      navigate("/");
+      navigate("/chat");
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -72,7 +73,8 @@ export default function LoginForm() {
           id: data.user.id,
           email: email,
           full_name: fullName,
-          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
+          avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${data.user.id}`,
+
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -97,7 +99,7 @@ export default function LoginForm() {
         );
       }
 
-      navigate("/");
+      navigate("/chat");
     } catch (error) {
       console.error("Registration error:", error);
       setError(
@@ -111,24 +113,24 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-[350px] bg-white/10 border-white/20 backdrop-blur-sm">
+    <Card className="w-[350px] border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-2xl text-white text-center">
+        <CardTitle className="text-2xl text-gray-900 text-center">
           Welcome
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 bg-white/10">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger
               value="login"
-              className="text-white data-[state=active]:bg-white/20"
+              className="data-[state=active]:bg-gray-100"
             >
               Login
             </TabsTrigger>
             <TabsTrigger
               value="register"
-              className="text-white data-[state=active]:bg-white/20"
+              className="data-[state=active]:bg-gray-100"
             >
               Register
             </TabsTrigger>
@@ -143,7 +145,7 @@ export default function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  className="border-gray-200 placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2">
@@ -153,10 +155,10 @@ export default function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  className="border-gray-200 placeholder:text-gray-400"
                 />
               </div>
-              {error && <p className="text-sm text-red-400">{error}</p>}
+              {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Loading..." : "Sign In"}
               </Button>
@@ -171,7 +173,7 @@ export default function LoginForm() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  className="border-gray-200 placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2">
@@ -181,7 +183,7 @@ export default function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  className="border-gray-200 placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2">
@@ -191,10 +193,10 @@ export default function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  className="border-gray-200 placeholder:text-gray-400"
                 />
               </div>
-              {error && <p className="text-sm text-red-400">{error}</p>}
+              {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Loading..." : "Create Account"}
               </Button>

@@ -79,8 +79,8 @@ const Home = () => {
             content: msg.content || "",
             isBot: msg.is_ai || false,
             avatar: msg.is_ai
-              ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
-              : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+              ? "https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
+              : "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
             timestamp: new Date(msg.created_at).toLocaleTimeString(),
           })),
         );

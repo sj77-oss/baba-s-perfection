@@ -114,15 +114,26 @@ export default function ChatSidebar({
 
   const deleteChat = async (chatId: string) => {
     try {
-      await supabase.from("chats").delete().eq("id", chatId);
-      // No need to manually update chats array - the subscription will handle it
+      // Optimistically update UI
+      setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+      if (selectedChatId === chatId) {
+        onChatSelect(undefined);
+      }
+
+      // Then delete from database
+      const { error } = await supabase.from("chats").delete().eq("id", chatId);
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error("Error deleting chat:", error);
+      // Revert optimistic update on error
+      fetchChats();
     }
   };
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
+    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col h-full overflow-hidden">
       <div className="p-4 border-b border-gray-200 bg-white">
         <Button
           onClick={createNewChat}
@@ -144,24 +155,35 @@ export default function ChatSidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
-              className={`group flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${selectedChatId === chat.id ? "bg-gray-200" : "hover:bg-gray-100"}`}
-              role="button"
+              className={`group relative flex px-3 py-2 rounded-lg transition-colors cursor-pointer w-full ${selectedChatId === chat.id ? "bg-gray-200" : "hover:bg-gray-100"}`}
               onClick={() => onChatSelect(chat.id)}
             >
-              <span className="flex-1 truncate text-sm">
-                {chat.title || "New Chat"}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="opacity-0 group-hover:opacity-100 h-8 w-8 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteChat(chat.id);
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center w-full gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="relative w-full pr-8">
+                    <span
+                      className="block truncate text-sm"
+                      title={chat.title || "New Chat"}
+                    >
+                      {chat.title || "New Chat"}
+                    </span>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 h-6 w-6 transition-opacity hover:bg-gray-200/50"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          deleteChat(chat.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>

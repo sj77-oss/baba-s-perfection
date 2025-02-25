@@ -162,25 +162,21 @@ export default function ChatsTab() {
               {selectedChat?.messages?.map((message) => (
                 <div
                   key={message.id}
-                  className={`p-4 rounded-lg ${message.is_ai ? "bg-blue-50 mr-auto" : "bg-gray-100 ml-auto"} max-w-[80%]`}
+                  className={`p-4 rounded-lg ${message.is_ai ? "bg-blue-50" : "bg-gray-100"} max-w-[80%] ${message.is_ai ? "ml-0" : "ml-auto"}`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${message.is_ai ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-700"}`}
-                      >
-                        {message.is_ai ? "AI" : "User"}
-                      </span>
-                    </div>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${message.is_ai ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-700"}`}
+                    >
+                      {message.is_ai ? "AI" : "User"}
+                    </span>
                     <span className="text-xs text-gray-500">
                       {new Date(message.created_at).toLocaleString()}
                     </span>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-gray-700 whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {message.content}
+                  </p>
                 </div>
               ))}
             </div>

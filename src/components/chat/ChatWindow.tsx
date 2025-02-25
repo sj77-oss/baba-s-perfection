@@ -21,7 +21,7 @@ interface ChatWindowProps {
 
 const ChatWindow = ({
   botName = "AI Assistant",
-  botAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+  botAvatar = "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
   messages = [
     {
       id: "1",

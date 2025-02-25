@@ -40,12 +40,12 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <Card className="w-[350px] bg-white/10 border-white/20 backdrop-blur-sm">
+    <Card className="w-[350px] border shadow-sm">
       <CardHeader className="space-y-4 items-center text-center">
-        <div className="bg-white/10 p-3 rounded-full w-fit">
-          <Shield className="w-6 h-6 text-white" />
+        <div className="bg-gray-100 p-3 rounded-full w-fit">
+          <Shield className="w-6 h-6 text-gray-900" />
         </div>
-        <CardTitle className="text-2xl text-white">Admin Login</CardTitle>
+        <CardTitle className="text-2xl text-gray-900">Admin Login</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,7 +55,7 @@ export default function AdminLoginForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              className="border-gray-200 placeholder:text-gray-400"
             />
           </div>
           <div className="space-y-2">
@@ -65,10 +65,10 @@ export default function AdminLoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              className="border-gray-200 placeholder:text-gray-400"
             />
           </div>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Loading..." : "Sign In"}
           </Button>

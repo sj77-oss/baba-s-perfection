@@ -4,6 +4,7 @@ import Home from "./components/home";
 import LoginPage from "./pages/login";
 import AdminLoginPage from "./pages/admin-login";
 import AdminPanel from "./pages/admin";
+import LandingPage from "./pages/landing";
 import routes from "tempo-routes";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -18,10 +19,12 @@ function App() {
       <Suspense fallback={<p>Loading...</p>}>
         <>
           <Routes>
+            <Route path="/" element={<Navigate to="/chat" replace />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin-login" element={<AdminLoginPage />} />
             <Route
-              path="/"
+              path="/chat"
               element={
                 <PrivateRoute>
                   <Home />
