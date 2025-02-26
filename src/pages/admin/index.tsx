@@ -172,7 +172,7 @@ export default function AdminPanel() {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-white overflow-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-auto">
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

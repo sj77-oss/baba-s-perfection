@@ -113,7 +113,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-[350px] border shadow-sm">
+    <Card className="w-[350px] border-0 shadow-xl bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-2xl text-gray-900 text-center">
           Welcome

@@ -12,6 +12,10 @@ interface ChatWindowProps {
     isBot: boolean;
     avatar?: string;
     timestamp?: string;
+    attachments?: Array<{
+      type: string;
+      url: string;
+    }>;
   }>;
   onSendMessage?: (message: string) => void;
   onSettingsClick?: () => void;
@@ -50,7 +54,7 @@ const ChatWindow = ({
   isAdmin = false,
 }: ChatWindowProps) => {
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-white">
       <ChatHeader
         botName={botName}
         botAvatar={botAvatar}

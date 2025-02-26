@@ -133,7 +133,7 @@ export default function ChatSidebar({
   };
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col h-full overflow-hidden">
+    <div className="w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200 flex flex-col h-full overflow-hidden shadow-lg">
       <div className="p-4 border-b border-gray-200 bg-white">
         <Button
           onClick={createNewChat}
