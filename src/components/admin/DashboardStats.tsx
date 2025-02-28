@@ -164,7 +164,7 @@ export default function DashboardStats() {
           className="transform-gpu"
         >
           <Card
-            className={`bg-gradient-to-br ${stat.gradient} text-white shadow-xl hover:shadow-2xl transition-all relative overflow-hidden hover:scale-[1.02] duration-300`}
+            className={`bg-gradient-to-br ${stat.gradient} text-white shadow-xl hover:shadow-2xl transition-all relative overflow-hidden`}
           >
             <div className="absolute inset-0 bg-white/5 rounded-lg transform rotate-12 scale-150 translate-x-1/2 translate-y-[-10%] opacity-20"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

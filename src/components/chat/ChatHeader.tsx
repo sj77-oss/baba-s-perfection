@@ -14,7 +14,7 @@ interface ChatHeaderProps {
 
 const ChatHeader = ({
   botName = "AI Assistant",
-  botAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+  botAvatar = "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
   onSettingsClick = () => {},
   onMenuClick = () => {},
   isAdmin = false,
@@ -22,7 +22,7 @@ const ChatHeader = ({
   const { signOut } = useAuth();
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shadow-sm backdrop-blur-sm bg-white/90 sticky top-0 z-10">
+    <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"

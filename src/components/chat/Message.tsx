@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import CodeBlock from "./CodeBlock";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Image as ImageIcon, ExternalLink } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Copy, Check } from "lucide-react";
 
 interface MessageProps {
   content: string;
@@ -11,10 +11,6 @@ interface MessageProps {
   avatar?: string;
   timestamp?: string;
   isLoading?: boolean;
-  attachments?: Array<{
-    type: string;
-    url: string;
-  }>;
 }
 
 const Message = ({
@@ -23,17 +19,37 @@ const Message = ({
   avatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
   timestamp = new Date().toLocaleTimeString(),
   isLoading = false,
-  attachments = [],
 }: MessageProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       className={cn(
-        "flex items-start gap-3 p-4 rounded-lg max-w-[80%] mb-4 shadow-sm transition-all duration-200 hover:shadow-md",
+        "flex items-start gap-3 p-4 rounded-lg max-w-[80%] mb-4 relative group",
         isBot
-          ? "bg-gradient-to-br from-blue-50 to-blue-100/50 mr-auto"
-          : "bg-gradient-to-br from-gray-50 to-gray-100/50 ml-auto flex-row-reverse",
+          ? "bg-[#E3F2FD] mr-auto"
+          : "bg-[#F5F5F5] ml-auto flex-row-reverse",
       )}
     >
+      {isBot && !isLoading && (
+        <button
+          onClick={handleCopy}
+          className="absolute top-2 right-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          aria-label="Copy message"
+        >
+          {copied ? <Check size={16} /> : <Copy size={16} />}
+        </button>
+      )}
+
       <Avatar className="w-10 h-10">
         <AvatarImage src={avatar} alt={isBot ? "Bot" : "User"} />
         <AvatarFallback>{isBot ? "B" : "U"}</AvatarFallback>
@@ -41,11 +57,20 @@ const Message = ({
 
       <div className={cn("flex flex-col", isBot ? "items-start" : "items-end")}>
         {isLoading ? (
-          <div className="flex items-center space-x-2 p-2">
-            <div className="flex space-x-1">
-              <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce"></div>
+          <div className="w-full max-w-[300px]">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="flex space-x-1">
+                <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce"></div>
+              </div>
+              <span className="text-xs text-gray-500">AI is thinking...</span>
+            </div>
+            <div className="space-y-2">
+              <div className="bg-gray-200 h-4 w-3/4 rounded animate-pulse"></div>
+              <div className="bg-gray-200 h-4 w-full rounded animate-pulse"></div>
+              <div className="bg-gray-200 h-4 w-5/6 rounded animate-pulse"></div>
+              <div className="bg-gray-200 h-4 w-2/3 rounded animate-pulse"></div>
             </div>
           </div>
         ) : (
@@ -54,54 +79,41 @@ const Message = ({
               {content.split("```").map((part, index) => {
                 if (index % 2 === 1) {
                   // This is a code block
-                  const [lang, ...code] = part.trim().split("\n");
+                  // Handle both formats: ```language\ncode or ```language code
+                  let lang = "";
+                  let code = [];
+
+                  const trimmedPart = part.trim();
+                  if (trimmedPart.includes("\n")) {
+                    // Format: ```language\ncode
+                    const lines = trimmedPart.split("\n");
+                    lang = lines[0].trim();
+                    code = lines.slice(1);
+                  } else {
+                    // If no newline, assume the whole part is code with no language
+                    lang = "";
+                    code = [trimmedPart];
+                  }
+
                   return (
-                    <CodeBlock
-                      key={index}
-                      content={code.join("\n")}
-                      language={lang || "typescript"}
-                    />
+                    <div key={index} className="relative">
+                      <CodeBlock
+                        key={index}
+                        content={code.join("\n")}
+                        language={lang || "typescript"}
+                      />
+                    </div>
                   );
                 }
                 // This is regular text
                 return <div key={index}>{part}</div>;
               })}
-              {attachments.map((attachment, index) => (
-                <div
-                  key={`attachment-${index}`}
-                  className="mt-2 p-3 bg-white/50 rounded-lg border flex items-center gap-3 hover:bg-white/80 transition-colors"
-                >
-                  {attachment.type === "document" ? (
-                    <FileText className="h-5 w-5 text-blue-500" />
-                  ) : (
-                    <ImageIcon className="h-5 w-5 text-green-500" />
-                  )}
-                  {attachment.type === "image" && (
-                    <img
-                      src={attachment.url}
-                      alt="Uploaded"
-                      className="max-w-[200px] rounded-lg"
-                    />
-                  )}
-                  <a
-                    href={attachment.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-700 transition-colors"
-                  >
-                    {attachment.type === "document"
-                      ? "View Document"
-                      : "View Full Size"}
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </div>
-              ))}
             </div>
             <span className="text-xs text-gray-500 mt-1">{timestamp}</span>
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

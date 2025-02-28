@@ -12,10 +12,6 @@ interface ChatWindowProps {
     isBot: boolean;
     avatar?: string;
     timestamp?: string;
-    attachments?: Array<{
-      type: string;
-      url: string;
-    }>;
   }>;
   onSendMessage?: (message: string) => void;
   onSettingsClick?: () => void;
@@ -31,14 +27,14 @@ const ChatWindow = ({
       id: "1",
       content: "Hello! How can I help you today?",
       isBot: true,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+      avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
       timestamp: "10:00 AM",
     },
     {
       id: "2",
       content: "I have a question about the service.",
       isBot: false,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+      avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
       timestamp: "10:01 AM",
     },
   ],
@@ -54,7 +50,7 @@ const ChatWindow = ({
   isAdmin = false,
 }: ChatWindowProps) => {
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="flex flex-col h-screen bg-white">
       <ChatHeader
         botName={botName}
         botAvatar={botAvatar}

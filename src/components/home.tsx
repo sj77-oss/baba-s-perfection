@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
-import { getGeminiResponse } from "@/lib/gemini";
+import { getGroqResponse } from "@/lib/groq";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import ChatSidebar from "./chat/ChatSidebar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Home = () => {
   const { user } = useAuth();
@@ -13,6 +20,7 @@ const Home = () => {
     title: string;
   }>();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>("llama3-70b-8192");
 
   // Check if user is admin
   useEffect(() => {
@@ -36,7 +44,7 @@ const Home = () => {
           id: "welcome",
           content: "Welcome! How can I assist you today?",
           isBot: true,
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
@@ -110,8 +118,8 @@ const Home = () => {
                 content: msg.content || "",
                 isBot: msg.is_ai || false,
                 avatar: msg.is_ai
-                  ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
-                  : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+                  ? "https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
+                  : "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
                 timestamp: new Date(msg.created_at).toLocaleTimeString(),
               },
             ]);
@@ -154,8 +162,8 @@ const Home = () => {
               content: msg.content || "",
               isBot: msg.is_ai || false,
               avatar: msg.is_ai
-                ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
-                : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+                ? "https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
+                : "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
               timestamp: new Date(msg.created_at).toLocaleTimeString(),
             })),
           );
@@ -192,8 +200,8 @@ const Home = () => {
                 content: msg.content || "",
                 isBot: msg.is_ai || false,
                 avatar: msg.is_ai
-                  ? "https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
-                  : "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+                  ? "https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
+                  : "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
                 timestamp: new Date(msg.created_at).toLocaleTimeString(),
               },
             ]);
@@ -215,7 +223,7 @@ const Home = () => {
           id: "1",
           content: "Welcome! How can I assist you today?",
           isBot: true,
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
@@ -231,7 +239,7 @@ const Home = () => {
         id: Date.now().toString(),
         content: message,
         isBot: false,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user",
+        avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=user",
         timestamp: new Date().toLocaleTimeString(),
       };
       setMessages((prev) => [...prev, userMessageTemp]);
@@ -267,13 +275,13 @@ const Home = () => {
           content: "",
           isBot: true,
           isLoading: true,
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
 
       // Get bot response
-      const response = await getGeminiResponse(message);
+      const response = await getGroqResponse(message, selectedModel);
 
       // Remove loading message and add actual response
       setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
@@ -283,7 +291,7 @@ const Home = () => {
         id: (Date.now() + 1).toString(),
         content: response,
         isBot: true,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bot",
+        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
         timestamp: new Date().toLocaleTimeString(),
       };
       setMessages((prev) => [...prev, botMessageTemp]);
@@ -310,9 +318,24 @@ const Home = () => {
       <div className="container mx-auto px-4 h-screen">
         <div className="h-full py-4">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full">
+            <div className="absolute top-4 right-20 z-10">
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="llama3-70b-8192">Llama 3 70B</SelectItem>
+                  <SelectItem value="llama3-8b-8192">Llama 3 8B</SelectItem>
+                  <SelectItem value="mixtral-8x7b-32768">
+                    Mixtral 8x7B
+                  </SelectItem>
+                  <SelectItem value="gemma-7b-it">Gemma 7B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <ChatWindow
               botName="AI Assistant"
-              botAvatar="https://api.dicebear.com/7.x/avataaars/svg?seed=bot"
+              botAvatar="https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
               messages={messages}
               onSendMessage={handleSendMessage}
               isAdmin={isAdmin}

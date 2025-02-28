@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import { supabase } from "@/lib/supabase";
 
 export default function LoginForm() {
@@ -113,7 +112,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-[350px] border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+    <Card className="w-[350px] border shadow-sm">
       <CardHeader>
         <CardTitle className="text-2xl text-gray-900 text-center">
           Welcome

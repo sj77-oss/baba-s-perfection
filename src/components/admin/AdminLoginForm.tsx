@@ -40,7 +40,7 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <Card className="w-[350px] border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+    <Card className="w-[350px] border shadow-sm">
       <CardHeader className="space-y-4 items-center text-center">
         <div className="bg-gray-100 p-3 rounded-full w-fit">
           <Shield className="w-6 h-6 text-gray-900" />

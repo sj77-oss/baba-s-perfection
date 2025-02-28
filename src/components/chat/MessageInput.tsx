@@ -27,7 +27,7 @@ const MessageInput = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white/80 backdrop-blur-sm border-t p-4 flex gap-2 items-center sticky bottom-0 w-full shadow-lg"
+      className="bg-white border-t p-4 flex gap-2 items-center sticky bottom-0 w-full"
     >
       <Input
         value={message}

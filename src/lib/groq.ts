@@ -8,11 +8,14 @@ if (!apiKey) {
 
 export const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
 
-export const getGroqResponse = async (prompt: string) => {
+export const getGroqResponse = async (
+  prompt: string,
+  model: string = "llama3-70b-8192",
+) => {
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama3-70b-8192",
+      model: model,
     });
     return (
       completion.choices[0]?.message?.content ||
