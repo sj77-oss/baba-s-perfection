@@ -20,7 +20,8 @@ const Home = () => {
     title: string;
   }>();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<string>("llama3-70b-8192");
+  const [selectedModel, setSelectedModel] =
+    useState<string>("mixtral-8x7b-32768");
 
   // Check if user is admin
   useEffect(() => {
@@ -215,12 +216,12 @@ const Home = () => {
     };
   }, [selectedChatId]);
 
-  // Welcome message when no chat is selected
+  // Welcome message when no chat is selected - only on initial load
   useEffect(() => {
     if (!selectedChatId) {
       setMessages([
         {
-          id: "1",
+          id: "welcome",
           content: "Welcome! How can I assist you today?",
           isBot: true,
           avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=assistant",
@@ -228,7 +229,7 @@ const Home = () => {
         },
       ]);
     }
-  }, [selectedChatId]);
+  }, []);
 
   const handleSendMessage = async (message: string) => {
     if (!selectedChatId || !user) return;
@@ -310,7 +311,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="bg-gray-50 flex justify-start items-start">
       <ChatSidebar
         selectedChatId={selectedChatId}
         onChatSelect={setSelectedChatId}

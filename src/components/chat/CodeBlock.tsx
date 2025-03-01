@@ -60,6 +60,44 @@ const CodeBlock = ({ content, language = "typescript" }: CodeBlockProps) => {
   // Normalize the language for syntax highlighting
   const normalizedLanguage = normalizeLanguage(codeLanguage);
 
+  // Force a specific theme with better contrast
+  const codeTheme = {
+    ...themes.nightOwl,
+    plain: { ...themes.nightOwl.plain, backgroundColor: "#011627" },
+    styles: [
+      ...themes.nightOwl.styles,
+      {
+        types: ["comment", "prolog", "doctype", "cdata"],
+        style: { color: "#809393", fontStyle: "italic" },
+      },
+      { types: ["namespace"], style: { opacity: 0.8 } },
+      { types: ["string", "attr-value"], style: { color: "#addb67" } },
+      { types: ["punctuation", "operator"], style: { color: "#c792ea" } },
+      {
+        types: [
+          "entity",
+          "url",
+          "symbol",
+          "number",
+          "boolean",
+          "variable",
+          "constant",
+          "property",
+          "regex",
+          "inserted",
+        ],
+        style: { color: "#f78c6c" },
+      },
+      {
+        types: ["atrule", "keyword", "attr-name", "selector"],
+        style: { color: "#c792ea" },
+      },
+      { types: ["function", "deleted", "tag"], style: { color: "#f07178" } },
+      { types: ["function-variable"], style: { color: "#82AAFF" } },
+      { types: ["tag", "selector", "keyword"], style: { color: "#ff5874" } },
+    ],
+  };
+
   return (
     <div className="relative group rounded-lg bg-gray-900 text-gray-50">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700 rounded-t-lg">
@@ -88,14 +126,21 @@ const CodeBlock = ({ content, language = "typescript" }: CodeBlockProps) => {
         </div>
       </div>
       <Highlight
-        theme={themes.nightOwl}
+        theme={codeTheme}
         code={content.trim()}
         language={normalizedLanguage}
       >
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre className="p-4 overflow-x-auto rounded-b-lg" style={style}>
+          <pre
+            className="p-4 overflow-x-auto rounded-b-lg max-w-full"
+            style={{ ...style, overflowX: "auto", maxWidth: "100%" }}
+          >
             {tokens.map((line, i) => (
-              <div key={i} {...getLineProps({ line })}>
+              <div
+                key={i}
+                {...getLineProps({ line })}
+                className="whitespace-pre"
+              >
                 {line.map((token, key) => (
                   <span key={key} {...getTokenProps({ token })} />
                 ))}

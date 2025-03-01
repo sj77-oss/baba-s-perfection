@@ -34,7 +34,7 @@ const Message = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "flex items-start gap-3 p-4 rounded-lg max-w-[80%] mb-4 relative group",
+        "flex items-start gap-3 p-4 rounded-lg max-w-[80%] mb-4 relative group overflow-hidden",
         isBot
           ? "bg-[#E3F2FD] mr-auto"
           : "bg-[#F5F5F5] ml-auto flex-row-reverse",
@@ -75,7 +75,7 @@ const Message = ({
           </div>
         ) : (
           <>
-            <div className="text-sm text-gray-800 whitespace-pre-wrap space-y-4">
+            <div className="text-sm text-gray-800 whitespace-pre-wrap space-y-4 w-full max-w-full overflow-hidden">
               {content.split("```").map((part, index) => {
                 if (index % 2 === 1) {
                   // This is a code block
@@ -96,11 +96,14 @@ const Message = ({
                   }
 
                   return (
-                    <div key={index} className="relative">
+                    <div
+                      key={index}
+                      className="relative max-w-full overflow-hidden"
+                    >
                       <CodeBlock
                         key={index}
                         content={code.join("\n")}
-                        language={lang || "typescript"}
+                        language={lang || "text"}
                       />
                     </div>
                   );

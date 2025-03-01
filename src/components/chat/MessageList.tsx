@@ -43,7 +43,7 @@ const MessageList = ({
   return (
     <div className="h-full w-full bg-white p-4">
       <ScrollArea className="h-full w-full pr-4">
-        <div className="flex flex-col">
+        <div className="flex flex-col max-w-full">
           {messages.map((message) => (
             <Message
               key={message.id}
