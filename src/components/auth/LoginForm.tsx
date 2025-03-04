@@ -11,6 +11,7 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -38,8 +39,13 @@ export default function LoginForm() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !fullName) {
+    if (!email || !password || !confirmPassword || !fullName) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
@@ -191,6 +197,16 @@ export default function LoginForm() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="border-gray-200 placeholder:text-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   className="border-gray-200 placeholder:text-gray-400"
                 />

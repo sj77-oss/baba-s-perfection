@@ -13,9 +13,22 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type User = {
   id: string;
@@ -34,6 +47,12 @@ type User = {
 export default function UsersTab() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -83,7 +102,73 @@ export default function UsersTab() {
   };
 
   const deleteUser = async (userId: string) => {
-    await supabase.from("profiles").delete().eq("id", userId);
+    try {
+      // First delete all user's chats and messages
+      const { data: chats } = await supabase
+        .from("chats")
+        .select("id")
+        .eq("user_id", userId);
+
+      if (chats && chats.length > 0) {
+        const chatIds = chats.map((chat) => chat.id);
+
+        // Delete messages for these chats
+        await supabase.from("messages").delete().in("chat_id", chatIds);
+
+        // Delete the chats
+        await supabase.from("chats").delete().in("id", chatIds);
+      }
+
+      // Delete the user profile
+      await supabase.from("profiles").delete().eq("id", userId);
+
+      // Delete the user from auth
+      await supabase.auth.admin.deleteUser(userId);
+
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
+  const openEditDialog = (user: User) => {
+    setSelectedUser(user);
+    setEditName(user.full_name || "");
+    setEditEmail(user.email || "");
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+
+    setIsUpdating(true);
+    setUpdateError("");
+
+    try {
+      // Update profile
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: editName,
+          email: editEmail,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", selectedUser.id);
+
+      if (error) throw error;
+
+      setShowEditDialog(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setUpdateError("Failed to update user");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const confirmDelete = (user: User) => {
+    setSelectedUser(user);
+    setShowDeleteConfirm(true);
   };
 
   const viewUserDetails = async (user: User) => {
@@ -120,7 +205,6 @@ export default function UsersTab() {
               <TableHead>Created At</TableHead>
               <TableHead>Admin</TableHead>
               <TableHead>Details</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -145,14 +229,6 @@ export default function UsersTab() {
                     onClick={() => viewUserDetails(user)}
                   >
                     View Details
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="destructive"
-                    onClick={() => deleteUser(user.id)}
-                  >
-                    Delete
                   </Button>
                 </TableCell>
               </TableRow>
@@ -215,6 +291,67 @@ export default function UsersTab() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Full Name</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+              />
+            </div>
+            {updateError && (
+              <p className="text-sm text-red-500">{updateError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateUser} disabled={isUpdating}>
+              {isUpdating ? "Updating..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the user account, all their chats and
+              messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => selectedUser && deleteUser(selectedUser.id)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
